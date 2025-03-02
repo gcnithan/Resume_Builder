@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Generator</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <style>
+        /* Custom CSS for the resume */
+        .background {
+            background-color: #87CEEB;
+        }
+        .myImage {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 3px solid white;
+            object-fit: cover;
+        }
+        #template {
+            display: none;
+        }
+        .form-control.is-invalid {
+            border-color: #dc3545;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+        .invalid-feedback {
+            display: none;
+            width: 100%;
+            margin-top: 0.25rem;
+            font-size: 0.875em;
+            color: #dc3545;
+        }
+        .profile-upload {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            margin: 0 auto;
+        }
+        .profile-upload img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #ccc;
+        }
+        .profile-upload .upload-btn {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: #4e73df;
+            color: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+            cursor: pointer;
+        }
+        #imageUpload {
+            display: none;
+        }
+        @media print {
+            #template .mt-3.text-center {
+                display: none !important;
+            }
+            @page {
+                margin: 0;
+                size: A4;
+            }
+            body {
+                margin: 0;
+            }
+            .container {
+                width: 100%;
+                max-width: none;
+            }
+            .row {
+                display: flex;
+                width: 100%;
+            }
+            .col-md-4 {
+                width: 33.33%;
+                flex: 0 0 auto;
+            }
+            .col-md-8 {
+                width: 66.67%;
+                flex: 0 0 auto;
+            }
+            .card {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+    <!-- Add html2pdf.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+    <div class="container" id="form">
+        <h1 class="text-center my-3">Resume Generator</h1>
+        <div class="row">
+            <div class="col-md-6">
+                <!-- first col -->
+                <h3 class="text-center mt-3">Personal Information</h3>
+                <hr>
+                <div class="form-group text-center mb-3">
+                    <div class="profile-upload">
+                        <img id="previewImg" src="https://icon-library.com/images/profiles-icon/profiles-icon-0.jpg" alt="Profile">
+                        <div class="upload-btn" onclick="document.getElementById('imageUpload').click()">
+                            <i class="fas fa-camera">+</i>
+                        </div>
+                        <input type="file" id="imageUpload" accept="image/*">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="nameField" class="mt-3">Your Name*</label>
+                    <input type="text" id="nameField" class="form-control" placeholder="Enter your name" required>
+                    <div class="invalid-feedback">Please enter your name</div>
+                    
+                    <label for="emailField" class="mt-3">Your Email*</label>
+                    <input type="email" id="emailField" class="form-control" placeholder="Enter your email" required>
+                    <div class="invalid-feedback">Please enter a valid email address</div>
+                    
+                    <label for="contactField" class="mt-3">Your Contact*</label>
+                    <input type="text" id="contactField" class="form-control" placeholder="Enter your contact no" required>
+                    <div class="invalid-feedback">Please enter a valid contact number</div>
+                    
+                    <label for="adressField" class="mt-3">Your Address*</label>
+                    <textarea class="form-control" placeholder="Enter here" id="adressField" cols="30" rows="5" required></textarea>
+                    <div class="invalid-feedback">Please enter your address</div>
+                    
+                    <hr>
+                    <p class="text-primary mt-3">Important Links</p>
+                    
+                    <label for="linkedinField" class="mt-3">Your LinkedIn</label>
+                    <input type="url" id="linkedinField" class="form-control" placeholder="https://www.linkedin.com/in/yourprofile">
+                    <div class="invalid-feedback">Please enter a valid URL (include https://)</div>
+                    
+                    <label for="projectField" class="mt-3">Your Project</label>
+                    <input type="url" id="projectField" class="form-control" placeholder="https://www.yourproject.com">
+                    <div class="invalid-feedback">Please enter a valid URL (include https://)</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <!-- second col -->
+                <h3 class="text-center mt-3">Professional Information</h3>
+                <hr>
+                <div class="form-group">
+                    <label for="objectiveField" class="mt-3">Objective*</label>
+                    <textarea class="form-control" id="objectiveField" placeholder="Enter here" cols="30" rows="3" required></textarea>
+                    <div class="invalid-feedback">Please enter your objective</div>
+                </div>
+                <div class="form-group" id="we">
+                    <label for="" class="mt-3">Work Experience*</label>
+                    <textarea class="form-control weField" placeholder="Enter here" cols="30" rows="3" required></textarea>
+                    <div class="invalid-feedback">Please enter your work experience</div>
+                    <div class="text-center mt-3" id="weAddButton">
+                        <button onclick="addWe()" class="btn btn-primary btn-sm">Add</button>
+                    </div>
+                </div>
+                <div class="form-group" id="aq">
+                    <label for="" class="mt-3">Academic Qualification*</label>
+                    <textarea class="form-control aqField" placeholder="Enter here" cols="30" rows="3" required></textarea>
+                    <div class="invalid-feedback">Please enter your academic qualification</div>
+                    <div class="text-center mt-3" id="aqAddButton">
+                        <button onclick="addAq()" class="btn btn-primary btn-sm">Add</button>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <button onclick="validateAndGenerate()" class="btn btn-primary btn-lg">Generate Resume</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" id="template">
+        <div class="row">
+            <div class="col-md-4 text-center py-5 background">
+                <!-- first -->
+                <img class="img-fluid myImage" id="profileImageT" src="https://icon-library.com/images/profiles-icon/profiles-icon-0.jpg" alt="">
+                <div>
+                    <p class="mt-3" id="nameT">Nithan</p>
+                    <p id="emailT">email@example.com</p>
+                    <p id="contactT">+91 7483124738</p>
+                    <p id="adressT">CKM,Housing board</p>
+                    <hr>
+                    <p>
+                        <a id="linkedT" href="#1" target="_blank">https://www.linkedin.com</a>
+                    </p>
+                    <p><a id="projectT" href="#1" target="_blank">https://www.project.com</a></p>
+                </div>
+            </div>
+            <div class="col-md-8 py-5">
+                <!-- second -->
+                <h1 class="text-center" style="font-weight: 980;" id="nameT1">Nithan Chandra</h1>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Objective</h3>
+                    </div>
+                    <div class="card-body">
+                        <p id="objectiveT">Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam sint, vero quasi eos alias perferendis, est deserunt deleniti possimus laudantium voluptas iste rem incidunt ea dicta.</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Work Experience</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul id="weT">
+                            <li>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Libero, nihil.</li>
+                            <li>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Libero, nihil.</li>
+                            <li>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Libero, nihil.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Academics Qualification</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul id="aqT">
+                            <li>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Libero, nihil.</li>
+                            <li>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Libero, nihil.</li>
+                            <li>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Libero, nihil.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mt-3 text-center">
+                    <button onclick="printResume()" class="btn btn-primary btn-lg">Print Resume</button>
+                    <button onclick="downloadPDF()" class="btn btn-success btn-lg">Download PDF</button>
+                    <button onclick="backToEdit()" class="btn btn-secondary btn-lg">Back to Edit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
+    <script>
+        // Profile image handling
+        document.getElementById('imageUpload').addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Update preview image
+                    document.getElementById('previewImg').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Form validation functions
+        function validateEmail(email) {
+            const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            return re.test(String(email).toLowerCase());
+        }
+
+        function validateURL(url) {
+            if (!url || url.trim() === '') return true; // Optional field
+            const re = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+            return re.test(url);
+        }
+
+        function validatePhone(phone) {
+            const re = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/;
+            return re.test(phone);
+        }
+
+        function validateForm() {
+            let isValid = true;
+            
+            // Check required fields
+            const nameField = document.getElementById('nameField');
+            if (!nameField.value.trim()) {
+                nameField.classList.add('is-invalid');
+                nameField.nextElementSibling.style.display = 'block';
+                isValid = false;
+            } else {
+                nameField.classList.remove('is-invalid');
+                nameField.nextElementSibling.style.display = 'none';
+            }
+            
+            // Validate email
+            const emailField = document.getElementById('emailField');
+            if (!emailField.value.trim() || !validateEmail(emailField.value)) {
+                emailField.classList.add('is-invalid');
+                emailField.nextElementSibling.style.display = 'block';
+                isValid = false;
+            } else {
+                emailField.classList.remove('is-invalid');
+                emailField.nextElementSibling.style.display = 'none';
+            }
+            
+            // Validate contact
+            const contactField = document.getElementById('contactField');
+            if (!contactField.value.trim() || !validatePhone(contactField.value)) {
+                contactField.classList.add('is-invalid');
+                contactField.nextElementSibling.style.display = 'block';
+                isValid = false;
+            } else {
+                contactField.classList.remove('is-invalid');
+                contactField.nextElementSibling.style.display = 'none';
+            }
+            
+            // Check address
+            const adressField = document.getElementById('adressField');
+            if (!adressField.value.trim()) {
+                adressField.classList.add('is-invalid');
+                adressField.nextElementSibling.style.display = 'block';
+                isValid = false;
+            } else {
+                adressField.classList.remove('is-invalid');
+                adressField.nextElementSibling.style.display = 'none';
+            }
+            
+            // Validate LinkedIn if provided
+            const linkedinField = document.getElementById('linkedinField');
+            if (linkedinField.value && !validateURL(linkedinField.value)) {
+                linkedinField.classList.add('is-invalid');
+                linkedinField.nextElementSibling.style.display = 'block';
+                isValid = false;
+            } else {
+                linkedinField.classList.remove('is-invalid');
+                linkedinField.nextElementSibling.style.display = 'none';
+            }
+            
+            // Validate Project URL if provided
+            const projectField = document.getElementById('projectField');
+            if (projectField.value && !validateURL(projectField.value)) {
+                projectField.classList.add('is-invalid');
+                projectField.nextElementSibling.style.display = 'block';
+                isValid = false;
+            } else {
+                projectField.classList.remove('is-invalid');
+                projectField.nextElementSibling.style.display = 'none';
+            }
+            
+            // Check objective
+            const objectiveField = document.getElementById('objectiveField');
+            if (!objectiveField.value.trim()) {
+                objectiveField.classList.add('is-invalid');
+                objectiveField.nextElementSibling.style.display = 'block';
+                isValid = false;
+            } else {
+                objectiveField.classList.remove('is-invalid');
+                objectiveField.nextElementSibling.style.display = 'none';
+            }
+            
+            // Validate at least one work experience
+            const weFields = document.getElementsByClassName('weField');
+            let hasValidWe = false;
+            for (let field of weFields) {
+                if (field.value.trim()) {
+                    hasValidWe = true;
+                    field.classList.remove('is-invalid');
+                } else {
+                    field.classList.add('is-invalid');
+                }
+            }
+            if (!hasValidWe) {
+                weFields[0].classList.add('is-invalid');
+                weFields[0].nextElementSibling.style.display = 'block';
+                isValid = false;
+            }
+            
+            // Validate at least one academic qualification
+            const aqFields = document.getElementsByClassName('aqField');
+            let hasValidAq = false;
+            for (let field of aqFields) {
+                if (field.value.trim()) {
+                    hasValidAq = true;
+                    field.classList.remove('is-invalid');
+                } else {
+                    field.classList.add('is-invalid');
+                }
+            }
+            if (!hasValidAq) {
+                aqFields[0].classList.add('is-invalid');
+                aqFields[0].nextElementSibling.style.display = 'block';
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+
+        // Add new fields functions
+        function addWe() {
+            let newNode = document.createElement("textarea");
+            newNode.classList.add("form-control");
+            newNode.classList.add("weField");
+            newNode.classList.add("mt-3");
+            newNode.setAttribute("placeholder", "Enter here");
+            newNode.setAttribute("rows", 3);
+            
+            let invalidFeedback = document.createElement("div");
+            invalidFeedback.classList.add("invalid-feedback");
+            invalidFeedback.textContent = "Please enter your work experience";
+            
+            let weOb = document.getElementById("we");
+            let weAddButtonOb = document.getElementById("weAddButton");
+            weOb.insertBefore(newNode, weAddButtonOb);
+            weOb.insertBefore(invalidFeedback, weAddButtonOb);
+        }
+
+        function addAq() {
+            let newNode = document.createElement("textarea");
+            newNode.classList.add("form-control");
+            newNode.classList.add("aqField");
+            newNode.classList.add("mt-3");
+            newNode.setAttribute("placeholder", "Enter here");
+            newNode.setAttribute("rows", 3);
+            
+            let invalidFeedback = document.createElement("div");
+            invalidFeedback.classList.add("invalid-feedback");
+            invalidFeedback.textContent = "Please enter your academic qualification";
+            
+            let aqOb = document.getElementById("aq");
+            let aqAddButtonOb = document.getElementById("aqAddButton");
+            aqOb.insertBefore(newNode, aqAddButtonOb);
+            aqOb.insertBefore(invalidFeedback, aqAddButtonOb);
+        }
+
+        // Validate and generate resume
+        function validateAndGenerate() {
+            if (validateForm()) {
+                generate();
+            } else {
+                // Scroll to the first invalid field
+                const invalidField = document.querySelector('.is-invalid');
+                if (invalidField) {
+                    invalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        }
+
+        // Generate resume
+        function generate() {
+            // Set profile image
+            document.getElementById('profileImageT').src = document.getElementById('previewImg').src;
+            
+            // Set text fields
+            document.getElementById('nameT').innerHTML = document.getElementById('nameField').value;
+            document.getElementById('nameT1').innerHTML = document.getElementById('nameField').value;
+            document.getElementById('emailT').innerHTML = document.getElementById('emailField').value;
+            document.getElementById('contactT').innerHTML = document.getElementById('contactField').value;
+            document.getElementById('adressT').innerHTML = document.getElementById('adressField').value;
+            
+            // Set links
+            document.getElementById('linkedT').innerHTML = document.getElementById('linkedinField').value || 'N/A';
+            if (document.getElementById('linkedinField').value) {
+                document.getElementById('linkedT').href = ensureHttpPrefix(document.getElementById('linkedinField').value);
+            } else {
+                document.getElementById('linkedT').href = '#';
+                document.getElementById('linkedT').style.textDecoration = 'none';
+            }
+            
+            document.getElementById('projectT').innerHTML = document.getElementById('projectField').value || 'N/A';
+            if (document.getElementById('projectField').value) {
+                document.getElementById('projectT').href = ensureHttpPrefix(document.getElementById('projectField').value);
+            } else {
+                document.getElementById('projectT').href = '#';
+                document.getElementById('projectT').style.textDecoration = 'none';
+            }
+            
+            document.getElementById('objectiveT').innerHTML = document.getElementById('objectiveField').value;
+
+            // Set work experience list
+            let wes = document.getElementsByClassName("weField");
+            let str = '';
+            for (let e of wes) {
+                if (e.value.trim()) {
+                    str = str + `<li>${e.value}</li>`;
+                }
+            }
+            document.getElementById('weT').innerHTML = str;
+
+            // Set academic qualifications list
+            let aqs = document.getElementsByClassName("aqField");
+            let str1 = '';
+            for (let e of aqs) {
+                if (e.value.trim()) {
+                    str1 = str1 + `<li>${e.value}</li>`;
+                }
+            }
+            document.getElementById('aqT').innerHTML = str1;
+
+            // Show template, hide form
+            document.getElementById('form').style.display = 'none';
+            document.getElementById('template').style.display = 'block';
+        }
+
+        // Helper function to ensure URLs have http/https prefix
+        function ensureHttpPrefix(url) {
+            if (!url) return '#';
+            return url.match(/^https?:\/\//) ? url : 'https://' + url;
+        }
+
+        // Go back to edit form
+        function backToEdit() {
+            document.getElementById('form').style.display = 'block';
+            document.getElementById('template').style.display = 'none';
+        }
+
+        // Print resume function
+        function printResume() {
+            // Hide the buttons before printing
+            const buttonsContainer = document.querySelector('#template .mt-3.text-center');
+            const originalDisplay = buttonsContainer.style.display;
+            buttonsContainer.style.display = 'none';
+            
+            // Print the page
+            window.print();
+            
+            // Restore the buttons after printing
+            setTimeout(() => {
+                buttonsContainer.style.display = originalDisplay;
+            }, 500);
+        }
+
+        // Download PDF function
+        function downloadPDF() {
+            // Get the resume template element
+            const element = document.getElementById('template');
+            
+            // Hide the buttons before generating PDF
+            const buttonsContainer = document.querySelector('#template .mt-3.text-center');
+            const originalDisplay = buttonsContainer.style.display;
+            buttonsContainer.style.display = 'none';
+            
+            // Get the name to use in the filename
+            const personName = document.getElementById('nameT').innerText || 'resume';
+            const fileName = personName.toLowerCase().replace(/\s+/g, '_') + '_resume.pdf';
+            
+            // Set options for PDF generation
+            const options = {
+                margin: [0, 0, 0, 0],
+                filename: fileName,
+                image: { type: 'jpeg', quality: 1 },
+                html2canvas: { 
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    letterRendering: true
+                },
+                jsPDF: { 
+                    unit: 'mm', 
+                    format: 'a4', 
+                    orientation: 'portrait',
+                    compress: true
+                }
+            };
+            
+            // Generate PDF
+            html2pdf().set(options).from(element).save().then(() => {
+                // Restore the buttons after PDF is generated
+                setTimeout(() => {
+                    buttonsContainer.style.display = originalDisplay;
+                }, 500);
+            });
+        }
+    </script>
+</body>
+</html>
